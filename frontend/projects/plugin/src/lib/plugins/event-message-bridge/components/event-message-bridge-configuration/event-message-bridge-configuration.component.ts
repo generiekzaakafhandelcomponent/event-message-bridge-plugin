@@ -46,7 +46,7 @@ export class EventMessageBridgeConfigurationComponent implements PluginConfigura
 
   public formValueChange(formValue: EventMessageBridgePluginConfig): void {
     this.formValue$.next(formValue);
-    const valid = !!formValue.configurationTitle;
+    const valid = !!(formValue.configurationTitle && formValue.embAppUrl);
     this.valid$.next(valid);
     this.valid.emit(valid);
   }

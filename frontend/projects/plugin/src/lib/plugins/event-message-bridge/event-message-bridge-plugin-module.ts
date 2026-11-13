@@ -17,13 +17,13 @@
 import {NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
 import {PluginTranslatePipeModule} from "@valtimo/plugin";
-import {FormModule, InputModule as ValtimoInputModule} from "@valtimo/components";
+import {FormModule, InputModule as ValtimoInputModule, SelectModule} from "@valtimo/components";
 import {EventMessageBridgeConfigurationComponent} from "./components/event-message-bridge-configuration/event-message-bridge-configuration.component";
 import {ReceiveEmbEventConfigurationComponent} from "./components/receive-emb-event-configuration/receive-emb-event-configuration.component";
 
 @NgModule({
   declarations: [EventMessageBridgeConfigurationComponent, ReceiveEmbEventConfigurationComponent],
-  imports: [CommonModule, PluginTranslatePipeModule, FormModule, ValtimoInputModule],
+  imports: [CommonModule, PluginTranslatePipeModule, FormModule, ValtimoInputModule, SelectModule],
   exports: [EventMessageBridgeConfigurationComponent, ReceiveEmbEventConfigurationComponent],
 })
 export class EventMessageBridgePluginModule {

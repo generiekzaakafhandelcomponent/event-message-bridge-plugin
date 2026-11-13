@@ -1,4 +1,4 @@
-name: plugin-docker-compose
+name: emb-plugin-docker-compose
 
 services:
   emb-plugin-keycloak:

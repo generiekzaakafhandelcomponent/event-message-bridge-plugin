@@ -17,30 +17,12 @@
 import {AccessControlManagementModule} from "@valtimo/access-control-management";
 import {AccountModule} from "@valtimo/account";
 import {AnalyseModule} from "@valtimo/analyse";
+import {AdminSettingsModule} from '@valtimo/admin-settings';
 import {AppComponent} from "./app.component";
 import {AppRoutingModule} from "./app-routing.module";
 import {
-  BesluitenApiPluginModule,
-  besluitenApiPluginSpecification,
-  CatalogiApiPluginModule,
-  catalogiApiPluginSpecification,
-  DocumentenApiPluginModule,
-  documentenApiPluginSpecification,
-  NotificatiesApiPluginModule,
-  notificatiesApiPluginSpecification,
-  ObjectenApiPluginModule,
-  objectenApiPluginSpecification,
-  ObjectTokenAuthenticationPluginModule,
-  objectTokenAuthenticationPluginSpecification,
-  ObjecttypenApiPluginModule,
-  objecttypenApiPluginSpecification,
-  OpenNotificatiesPluginModule,
-  openNotificatiesPluginSpecification,
-  OpenZaakPluginModule,
-  openZaakPluginSpecification,
   PLUGINS_TOKEN,
-  ZakenApiPluginModule,
-  zakenApiPluginSpecification,
+  ExternalPluginPageRoutingModule,
 } from "@valtimo/plugin";
 import {BootstrapModule} from "@valtimo/bootstrap";
 import {
@@ -82,8 +64,6 @@ import {LoggerModule} from "ngx-logger";
 import {LoggingModule} from "@valtimo/logging";
 import {MigrationModule} from "@valtimo/migration";
 import {MilestoneModule} from "@valtimo/milestone";
-import {ObjectManagementModule} from "@valtimo/object-management";
-import {ObjectModule} from "@valtimo/object";
 import {PluginManagementModule} from "@valtimo/plugin-management";
 import {ProcessLinkModule} from "@valtimo/process-link";
 import {ProcessManagementModule} from "@valtimo/process-management";
@@ -96,7 +76,6 @@ import {TaskModule} from "@valtimo/task";
 import {TeamsModule} from "@valtimo/teams";
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
 import {environment} from "../environments/environment";
-import {registerDocumentenApiFormioUploadComponent, ZgwModule} from "@valtimo/zgw";
 
 import {EventMessageBridgePluginModule, eventMessageBridgePluginSpecification,} from "@valtimo-plugins/event-message-bridge";
 
@@ -115,6 +94,7 @@ export function tabsFactory() {
     environment.authentication.module,
     AccessControlManagementModule,
     AccountModule,
+    AdminSettingsModule,
     AnalyseModule,
     AppRoutingModule,
     BootstrapModule,
@@ -124,16 +104,14 @@ export function tabsFactory() {
     CaseManagementModule,
     CaseMigrationModule,
     CaseModule.forRoot(tabsFactory),
-    BesluitenApiPluginModule,
-    CatalogiApiPluginModule,
     ChoiceFieldModule,
     CommonModule,
     ConfigModule.forRoot(environment),
     DashboardManagementModule,
     DashboardModule,
     DecisionModule,
-    DocumentenApiPluginModule,
     DocumentModule,
+    ExternalPluginPageRoutingModule,
     FormManagementModule,
     FormModule,
     FormsModule,
@@ -144,14 +122,6 @@ export function tabsFactory() {
     MenuModule,
     MigrationModule,
     MilestoneModule,
-    NotificatiesApiPluginModule,
-    ObjectenApiPluginModule,
-    ObjectManagementModule,
-    ObjectModule,
-    ObjectTokenAuthenticationPluginModule,
-    ObjecttypenApiPluginModule,
-    OpenNotificatiesPluginModule,
-    OpenZaakPluginModule,
     PluginManagementModule,
     ProcessLinkModule,
     ProcessManagementModule,
@@ -174,24 +144,12 @@ export function tabsFactory() {
     TranslationManagementModule,
     ValuePathSelectorComponent,
     WidgetModule,
-    ZakenApiPluginModule,
-    ZgwModule,
   ],
   providers: [
     {
       provide: PLUGINS_TOKEN,
       useValue: [
-        besluitenApiPluginSpecification,
-        catalogiApiPluginSpecification,
-        documentenApiPluginSpecification,
-        notificatiesApiPluginSpecification,
-        objectTokenAuthenticationPluginSpecification,
-        objectenApiPluginSpecification,
-        objecttypenApiPluginSpecification,
-        openNotificatiesPluginSpecification,
-        openZaakPluginSpecification,
         eventMessageBridgePluginSpecification,
-        zakenApiPluginSpecification,
       ],
     },
   ],
@@ -202,7 +160,6 @@ export class AppModule {
     enableCustomFormioComponents(injector);
     registerFormioUploadComponent(injector);
     registerFormioFileSelectorComponent(injector);
-    registerDocumentenApiFormioUploadComponent(injector);
     registerFormioValueResolverSelectorComponent(injector);
   }
 }

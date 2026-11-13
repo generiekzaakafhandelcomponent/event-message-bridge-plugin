@@ -23,16 +23,31 @@
     prefill: prefillConfiguration$ ? (prefillConfiguration$ | async) : null
   } as obs"
 >
-  <v-input
+  <v-select
+    name="originId"
+    [title]="'originId' | pluginTranslate: pluginId | async"
+    [margin]="true"
+    [items]="(origins$ | async) || []"
+    [loading]="(origins$ | async) === null"
+    [defaultSelectionId]="obs.prefill?.originId"
+    [disabled]="obs.disabled"
+    [required]="true"
+    [tooltip]="'originIdTooltip' | pluginTranslate: pluginId | async"
+    [widthInPx]="350"
+  >
+  </v-select>
+  <v-select
     name="eventItemId"
     [title]="'eventItemId' | pluginTranslate: pluginId | async"
     [margin]="true"
-    [defaultValue]="obs.prefill?.eventItemId"
+    [items]="(eventItems$ | async) || []"
+    [loading]="(eventItems$ | async) === null"
+    [defaultSelectionId]="obs.prefill?.eventItemId"
+    [clearSelectionSubject$]="clearEventItem$"
     [disabled]="obs.disabled"
     [required]="true"
     [tooltip]="'eventItemIdTooltip' | pluginTranslate: pluginId | async"
-    [widthPx]="350"
-    placeholder="4cd89296-ac05-49c2-abb6-50f566773bb9"
+    [widthInPx]="350"
   >
-  </v-input>
+  </v-select>
 </v-form>

@@ -17,9 +17,11 @@
 import {PluginConfigurationData} from "@valtimo/plugin";
 
 interface EventMessageBridgePluginConfig extends PluginConfigurationData {
+  embAppUrl: string;
 }
 
 interface ReceiveEmbEventConfig {
+  originId: string;
   eventItemId: string;
 }
 

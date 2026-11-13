@@ -87,12 +87,6 @@ valtimo:
       enabled: true
       ports:
         - 8080
-        - 8001
-        - 8002
-        - 8003
-        - 8006
-        - 8010
-        - 8011
   changelog:
     pbac:
       clear-tables: false
@@ -139,5 +133,4 @@ operaton:
         enforceHistoryTimeToLive: false
 
 implementation:
-  suwinet:
-    maxAgeKindAlsThuiswonend: 100
+

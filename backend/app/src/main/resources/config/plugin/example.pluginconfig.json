@@ -3,6 +3,8 @@
         "id": "4ac9a49f-4aeb-4f91-86d9-853fd95a1b33",
         "title": "Event Message Bridge (Autodeployed)",
         "pluginDefinitionKey": "event-message-bridge",
-        "properties": {}
+        "properties": {
+            "embAppUrl": "${EMB_APP_URL}"
+        }
     }
 ]
