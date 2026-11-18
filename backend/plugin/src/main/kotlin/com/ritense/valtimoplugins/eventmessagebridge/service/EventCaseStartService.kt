@@ -19,6 +19,7 @@ package com.ritense.valtimoplugins.eventmessagebridge.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.ritense.authorization.AuthorizationContext
 import com.ritense.case.service.CaseDefinitionService
 import com.ritense.document.domain.impl.request.NewDocumentRequest
@@ -60,7 +61,7 @@ data class StartedCase(
 )
 
 data class EventResult(
-    /** True when the event was handled before; nothing was started this time. */
+    /** True when the event was handled before; nothing was started this time and [startedCases] are those of the first time. */
     val duplicate: Boolean,
     val startedCases: List<StartedCase>,
 )
@@ -94,19 +95,21 @@ open class EventCaseStartService(
             return EventResult(duplicate = false, startedCases = emptyList())
         }
 
-        if (processedEventRepository.existsById(event.eventId)) {
+        val processed = processedEventRepository.findById(event.eventId).orElse(null)
+        if (processed != null) {
             logger.debug { "Skipping duplicate EMB event '${event.eventId}'" }
-            return EventResult(duplicate = true, startedCases = emptyList())
+            return EventResult(duplicate = true, startedCases = processed.startedCases?.let { objectMapper.readValue(it) } ?: emptyList())
         }
         // Inserted and flushed now, so a concurrent delivery of the same event fails on this row
         // before it acts on anything, rather than after.
-        processedEventRepository.saveAndFlush(ProcessedEvent(eventId = event.eventId))
+        val processedEvent = ProcessedEvent(eventId = event.eventId)
+        processedEventRepository.saveAndFlush(processedEvent)
 
         val variables = buildProcessVariables(event)
-        return EventResult(
-            duplicate = false,
-            startedCases = processLinks.mapNotNull { startCase(it, variables) },
-        )
+        val startedCases = processLinks.mapNotNull { startCase(it, variables) }
+        // processedEvent is managed since its insert: this change is written on commit.
+        processedEvent.startedCases = objectMapper.writeValueAsString(startedCases)
+        return EventResult(duplicate = false, startedCases = startedCases)
     }
 
     private fun eventItemIdOf(processLink: PluginProcessLink): String? =
@@ -233,10 +236,10 @@ open class EventCaseStartService(
     private fun buildProcessVariables(event: EmbEvent): Map<String, Any> {
         val variables =
             mutableMapOf<String, Any>(
-                "embEventId" to event.eventId,
-                "embEventItemId" to event.eventItemId,
+                "eventId" to event.eventId,
+                "eventItemId" to event.eventItemId,
             )
-        event.data?.let { variables["embEventData"] = it }
+        event.data?.let { variables["eventData"] = it }
         return variables
     }
 

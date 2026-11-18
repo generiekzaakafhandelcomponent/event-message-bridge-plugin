@@ -35,6 +35,9 @@ class ProcessedEvent(
     val eventId: String,
     @Column(name = "processed_at", nullable = false)
     val processedAt: Instant = Instant.now(),
+    /** JSON list of the StartedCases, returned again when the event is delivered a second time. */
+    @Column(name = "started_cases")
+    var startedCases: String? = null,
 ) : Persistable<String> {
     override fun getId(): String = eventId
 

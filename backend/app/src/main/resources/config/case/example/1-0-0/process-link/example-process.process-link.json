@@ -6,14 +6,9 @@
         "formDefinitionName": "start-form-example"
     },
     {
-        "activityId": "emb-event-start",
-        "activityType": "bpmn:MessageStartEvent:start",
-        "processLinkType": "plugin",
-        "pluginDefinitionKey": "event-message-bridge",
-        "pluginActionDefinitionKey": "receive-emb-event",
-        "pluginConfigurationId": "4ac9a49f-4aeb-4f91-86d9-853fd95a1b33",
-        "actionProperties": {
-            "eventItemId": "00000000-0000-0000-0000-000000000000"
-        }
+        "activityId": "Activity_approve",
+        "activityType": "bpmn:UserTask:create",
+        "processLinkType": "form",
+        "formDefinitionName": "approve-example"
     }
 ]

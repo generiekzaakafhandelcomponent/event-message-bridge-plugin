@@ -20,6 +20,7 @@ import com.ritense.valtimo.contract.annotation.SkipComponentScan
 import com.ritense.valtimoplugins.eventmessagebridge.service.EmbEvent
 import com.ritense.valtimoplugins.eventmessagebridge.service.EventCaseStartService
 import com.ritense.valtimoplugins.eventmessagebridge.service.EventResult
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -40,10 +41,13 @@ class EventResource(
         if (event.eventId.isBlank() || event.eventItemId.isBlank()) {
             return ResponseEntity.badRequest().build()
         }
-        return ResponseEntity.ok(eventCaseStartService.handle(event))
+        val result = eventCaseStartService.handle(event)
+        logger.debug { "EMB event '${event.eventId}' for event item '${event.eventItemId}' handled: $result" }
+        return ResponseEntity.ok(result)
     }
 
     companion object {
         const val EVENT_URL = "/api/v1/plugin/event-message-bridge/event"
+        private val logger = KotlinLogging.logger {}
     }
 }

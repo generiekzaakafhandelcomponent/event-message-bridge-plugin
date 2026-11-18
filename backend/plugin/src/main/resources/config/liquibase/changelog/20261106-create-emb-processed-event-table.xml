@@ -34,5 +34,10 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="2" author="Ritense">
+        <addColumn tableName="emb_processed_event">
+            <column name="started_cases" type="TEXT"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>
