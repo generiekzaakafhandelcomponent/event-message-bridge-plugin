@@ -56,6 +56,8 @@ data class EmbEvent(
 /** A case started for an event. [businessKey] is the id of the case document. */
 data class StartedCase(
     val processLinkId: UUID,
+    /** The process definition's name, or its key when it has no name. */
+    val processDefinitionName: String,
     val processInstanceId: String,
     val businessKey: String,
 )
@@ -216,6 +218,7 @@ open class EventCaseStartService(
                 .setVariables(variables)
                 .correlateStartMessage()
 
+        val processDefinitionName = repositoryService.getProcessDefinition(processLink.processDefinitionId).let { it.name ?: it.key }
         // Usually already associated by Valtimo's start event listener; only fill the gap, the same
         // way Valtimo's own start paths do.
         AuthorizationContext.runWithoutAuthorization {
@@ -226,11 +229,11 @@ open class EventCaseStartService(
                 processDocumentAssociationService.createProcessDocumentInstance(
                     processInstance.id,
                     UUID.fromString(businessKey),
-                    repositoryService.getProcessDefinition(processLink.processDefinitionId).let { it.name ?: it.key },
+                    processDefinitionName,
                 )
             }
         }
-        return StartedCase(processLink.id, processInstance.id, businessKey)
+        return StartedCase(processLink.id, processDefinitionName, processInstance.id, businessKey)
     }
 
     private fun buildProcessVariables(event: EmbEvent): Map<String, Any> {

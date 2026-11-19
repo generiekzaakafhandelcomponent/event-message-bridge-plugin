@@ -119,7 +119,7 @@ class EventCaseStartServiceTest : BaseTest() {
             eq(DOCUMENT_ID.id),
             eq("Verwerk event"),
         )
-        assertEquals(listOf(StartedCase(link.id, PROCESS_INSTANCE_ID, DOCUMENT_ID.toString())), result.startedCases)
+        assertEquals(listOf(StartedCase(link.id, "Verwerk event", PROCESS_INSTANCE_ID, DOCUMENT_ID.toString())), result.startedCases)
     }
 
     @Test

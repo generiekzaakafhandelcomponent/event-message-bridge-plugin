@@ -15,7 +15,7 @@ Matching uses only the event item id on the process link, never the BPMN message
 
 ```kotlin
 dependencies {
-    implementation("com.ritense.valtimoplugins:event-message-bridge:0.0.1")
+    implementation("com.ritense.valtimoplugins:event-message-bridge:1.0.0")
 }
 ```
 
@@ -24,7 +24,7 @@ dependencies {
 ```json
 {
   "dependencies": {
-    "@valtimo-plugins/event-message-bridge": "0.0.1"
+    "@valtimo-plugins/event-message-bridge": "1.0.0"
   }
 }
 ```
