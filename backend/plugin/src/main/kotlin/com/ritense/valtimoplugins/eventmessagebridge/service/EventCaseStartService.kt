@@ -19,6 +19,7 @@ package com.ritense.valtimoplugins.eventmessagebridge.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.ritense.authorization.AuthorizationContext
 import com.ritense.case.service.CaseDefinitionService
 import com.ritense.document.domain.impl.request.NewDocumentRequest
@@ -55,12 +56,14 @@ data class EmbEvent(
 /** A case started for an event. [businessKey] is the id of the case document. */
 data class StartedCase(
     val processLinkId: UUID,
+    /** The process definition's name, or its key when it has no name. */
+    val processDefinitionName: String,
     val processInstanceId: String,
     val businessKey: String,
 )
 
 data class EventResult(
-    /** True when the event was handled before; nothing was started this time. */
+    /** True when the event was handled before; nothing was started this time and [startedCases] are those of the first time. */
     val duplicate: Boolean,
     val startedCases: List<StartedCase>,
 )
@@ -94,19 +97,21 @@ open class EventCaseStartService(
             return EventResult(duplicate = false, startedCases = emptyList())
         }
 
-        if (processedEventRepository.existsById(event.eventId)) {
+        val processed = processedEventRepository.findById(event.eventId).orElse(null)
+        if (processed != null) {
             logger.debug { "Skipping duplicate EMB event '${event.eventId}'" }
-            return EventResult(duplicate = true, startedCases = emptyList())
+            return EventResult(duplicate = true, startedCases = processed.startedCases?.let { objectMapper.readValue(it) } ?: emptyList())
         }
         // Inserted and flushed now, so a concurrent delivery of the same event fails on this row
         // before it acts on anything, rather than after.
-        processedEventRepository.saveAndFlush(ProcessedEvent(eventId = event.eventId))
+        val processedEvent = ProcessedEvent(eventId = event.eventId)
+        processedEventRepository.saveAndFlush(processedEvent)
 
         val variables = buildProcessVariables(event)
-        return EventResult(
-            duplicate = false,
-            startedCases = processLinks.mapNotNull { startCase(it, variables) },
-        )
+        val startedCases = processLinks.mapNotNull { startCase(it, variables) }
+        // processedEvent is managed since its insert: this change is written on commit.
+        processedEvent.startedCases = objectMapper.writeValueAsString(startedCases)
+        return EventResult(duplicate = false, startedCases = startedCases)
     }
 
     private fun eventItemIdOf(processLink: PluginProcessLink): String? =
@@ -213,6 +218,7 @@ open class EventCaseStartService(
                 .setVariables(variables)
                 .correlateStartMessage()
 
+        val processDefinitionName = repositoryService.getProcessDefinition(processLink.processDefinitionId).let { it.name ?: it.key }
         // Usually already associated by Valtimo's start event listener; only fill the gap, the same
         // way Valtimo's own start paths do.
         AuthorizationContext.runWithoutAuthorization {
@@ -223,20 +229,20 @@ open class EventCaseStartService(
                 processDocumentAssociationService.createProcessDocumentInstance(
                     processInstance.id,
                     UUID.fromString(businessKey),
-                    repositoryService.getProcessDefinition(processLink.processDefinitionId).let { it.name ?: it.key },
+                    processDefinitionName,
                 )
             }
         }
-        return StartedCase(processLink.id, processInstance.id, businessKey)
+        return StartedCase(processLink.id, processDefinitionName, processInstance.id, businessKey)
     }
 
     private fun buildProcessVariables(event: EmbEvent): Map<String, Any> {
         val variables =
             mutableMapOf<String, Any>(
-                "embEventId" to event.eventId,
-                "embEventItemId" to event.eventItemId,
+                "eventId" to event.eventId,
+                "eventItemId" to event.eventItemId,
             )
-        event.data?.let { variables["embEventData"] = it }
+        event.data?.let { variables["eventData"] = it }
         return variables
     }
 

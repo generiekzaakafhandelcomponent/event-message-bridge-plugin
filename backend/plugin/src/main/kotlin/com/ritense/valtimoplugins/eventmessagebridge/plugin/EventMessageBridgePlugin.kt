@@ -19,6 +19,7 @@ package com.ritense.valtimoplugins.eventmessagebridge.plugin
 import com.ritense.plugin.annotation.Plugin
 import com.ritense.plugin.annotation.PluginAction
 import com.ritense.plugin.annotation.PluginActionProperty
+import com.ritense.plugin.annotation.PluginProperty
 import com.ritense.processlink.domain.ActivityTypeWithEventName.MESSAGE_START_EVENT_START
 import io.github.oshai.kotlinlogging.KotlinLogging
 
@@ -32,6 +33,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
     description = "Starts a case when the Event Message Bridge receives an event",
 )
 open class EventMessageBridgePlugin {
+    @PluginProperty(key = "embAppUrl", secret = false)
+    lateinit var embAppUrl: String
+
     /**
      * Never runs a process: the process link itself is the subscription. EventCaseStartService
      * starts the linked process when EMB reports an event for [eventItemId].
@@ -43,6 +47,8 @@ open class EventMessageBridgePlugin {
         activityTypes = [MESSAGE_START_EVENT_START],
     )
     open fun receiveEvent(
+        // Only used to prefill the origin select in the process link editor; matching uses eventItemId.
+        @PluginActionProperty originId: String?,
         @PluginActionProperty eventItemId: String?,
     ) {
         logger.debug { "Receive EMB event action registered for event item $eventItemId" }

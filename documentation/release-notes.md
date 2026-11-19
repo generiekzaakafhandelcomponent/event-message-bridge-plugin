@@ -2,7 +2,7 @@
 
 Overzicht van wijzigingen per versie van de Event Message Bridge-plugin.
 
-## 0.0.1
+## 1.0.0
 
 Eerste versie.
 

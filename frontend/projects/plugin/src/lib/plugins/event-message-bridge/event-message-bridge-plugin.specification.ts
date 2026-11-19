@@ -33,11 +33,15 @@ const eventMessageBridgePluginSpecification: PluginSpecification = {
       configurationTitle: "Configuratienaam",
       configurationTitleTooltip:
         "De naam van de huidige plugin-configuratie. Onder deze naam kan de configuratie in de rest van de applicatie teruggevonden worden.",
+      embAppUrl: "EMB-applicatie URL",
+      embAppUrlTooltip: "De URL van de Event Message Bridge-applicatie.",
       "receive-emb-event": "EMB-event ontvangen",
       receiveEmbEventDescription:
         "Start een zaak van dit proces bij dit message start event wanneer de Event Message Bridge een event voor het gekozen event item ontvangt.",
-      eventItemId: "Event item ID",
-      eventItemIdTooltip: "Het ID van het event item in de Event Message Bridge (te vinden op de detailpagina van het event item).",
+      originId: "Bron",
+      originIdTooltip: "De bron (event origin) in de Event Message Bridge waaruit het event item komt.",
+      eventItemId: "Event item",
+      eventItemIdTooltip: "Het event item van de gekozen bron waarvoor een zaak van dit proces gestart wordt.",
     },
     en: {
       title: "Event Message Bridge",
@@ -45,11 +49,15 @@ const eventMessageBridgePluginSpecification: PluginSpecification = {
       configurationTitle: "Configuration name",
       configurationTitleTooltip:
         "The name of the current plugin configuration. Under this name, the configuration can be found in the rest of the application.",
+      embAppUrl: "EMB application URL",
+      embAppUrlTooltip: "The URL of the Event Message Bridge application.",
       "receive-emb-event": "Receive EMB event",
       receiveEmbEventDescription:
         "Starts a case of this process at this message start event when the Event Message Bridge receives an event for the chosen event item.",
-      eventItemId: "Event item ID",
-      eventItemIdTooltip: "The ID of the event item in the Event Message Bridge (shown on the event item's detail page).",
+      originId: "Origin",
+      originIdTooltip: "The event origin in the Event Message Bridge the event item belongs to.",
+      eventItemId: "Event item",
+      eventItemIdTooltip: "The event item of the chosen origin for which a case of this process is started.",
     },
   },
 };

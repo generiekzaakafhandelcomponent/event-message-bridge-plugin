@@ -105,17 +105,18 @@ export const environment: ValtimoConfig = {
         sequence: 6,
         children: [
           {title: "Configuration", textClass: "text-dark font-weight-bold c-default", sequence: 1},
+          {link: ['/admin-settings'], title: 'adminSettings.title'},
           {link: ["/building-block-management"], title: "buildingBlockManagement.title", sequence: 2},
           {link: ["/case-management"], title: "Cases", sequence: 3},
-          {link: ["/plugins"], title: "Plugins", sequence: 4},
           {link: ["/dashboard-management"], title: "Dashboard", sequence: 5},
           {link: ["/access-control"], title: "Access Control", sequence: 6},
           {link: ["/translation-management"], title: "Translations", sequence: 7},
           {link: ["/choice-fields"], title: "Choice fields", sequence: 8},
 
-          {title: "Object management", textClass: "text-dark font-weight-bold c-default", sequence: 9},
-          {link: ["/object-management"], title: "Objects", sequence: 10},
-          {link: ["/form-management"], title: "Forms", sequence: 11},
+          {title: 'Integrations', textClass: 'text-dark font-weight-bold c-default', sequence: 8},
+          {link: ['/plugins'], title: 'Plugins', sequence: 9},
+          {link: ['/plugin-hosts'], title: 'Plugin hosts', sequence: 10},
+          {link: ['/plugin-apps'], title: 'Apps', sequence: 11},
 
           {title: "System processes", textClass: "text-dark font-weight-bold c-default", sequence: 12},
           {link: ["/processes"], title: "Processes", sequence: 13},

@@ -33,4 +33,15 @@
     placeholder="Event Message Bridge"
   >
   </v-input>
+  <v-input
+    name="embAppUrl"
+    [title]="'embAppUrl' | pluginTranslate: pluginId | async"
+    [margin]="true"
+    [disabled]="obs.disabled"
+    [defaultValue]="obs.prefill?.embAppUrl"
+    [required]="true"
+    [tooltip]="'embAppUrlTooltip' | pluginTranslate: pluginId | async"
+    [widthPx]="350"
+  >
+  </v-input>
 </v-form>

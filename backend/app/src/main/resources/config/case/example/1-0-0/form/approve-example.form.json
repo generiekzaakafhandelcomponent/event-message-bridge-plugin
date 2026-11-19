@@ -1,0 +1,46 @@
+{
+    "display": "form",
+    "components": [
+        {
+            "key": "html",
+            "type": "htmlelement",
+            "input": false,
+            "label": "Instructions",
+            "content": "Check the case details and approve the case.",
+            "tableView": false,
+            "refreshOnChange": false
+        },
+        {
+            "key": "name",
+            "type": "textfield",
+            "input": true,
+            "label": "Name",
+            "disabled": true,
+            "tableView": true
+        },
+        {
+            "key": "embEventId",
+            "type": "textfield",
+            "input": true,
+            "label": "EMB event ID",
+            "disabled": true,
+            "tableView": true
+        },
+        {
+            "key": "embEventItemId",
+            "type": "textfield",
+            "input": true,
+            "label": "EMB event item ID",
+            "disabled": true,
+            "tableView": true
+        },
+        {
+            "key": "submit",
+            "type": "button",
+            "input": true,
+            "label": "Approve",
+            "tableView": false,
+            "disableOnInvalid": true
+        }
+    ]
+}

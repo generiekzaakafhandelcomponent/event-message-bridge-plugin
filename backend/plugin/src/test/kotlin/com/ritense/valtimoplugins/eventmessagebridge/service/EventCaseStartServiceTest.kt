@@ -17,6 +17,7 @@
 package com.ritense.valtimoplugins.eventmessagebridge.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.case.service.CaseDefinitionService
 import com.ritense.case_.domain.definition.CaseDefinition
 import com.ritense.document.domain.Document
@@ -34,12 +35,14 @@ import com.ritense.processlink.domain.ActivityTypeWithEventName
 import com.ritense.processlink.repository.ValtimoPluginProcessLinkRepository
 import com.ritense.valtimo.contract.case_.CaseDefinitionId
 import com.ritense.valtimoplugins.eventmessagebridge.BaseTest
+import com.ritense.valtimoplugins.eventmessagebridge.domain.ProcessedEvent
 import com.ritense.valtimoplugins.eventmessagebridge.repository.ProcessedEventRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -95,7 +98,7 @@ class EventCaseStartServiceTest : BaseTest() {
                 documentService,
                 processDocumentAssociationService,
                 caseDefinitionService,
-                ObjectMapper(),
+                jacksonObjectMapper(),
                 processedEventRepository,
             )
     }
@@ -116,7 +119,7 @@ class EventCaseStartServiceTest : BaseTest() {
             eq(DOCUMENT_ID.id),
             eq("Verwerk event"),
         )
-        assertEquals(listOf(StartedCase(link.id, PROCESS_INSTANCE_ID, DOCUMENT_ID.toString())), result.startedCases)
+        assertEquals(listOf(StartedCase(link.id, "Verwerk event", PROCESS_INSTANCE_ID, DOCUMENT_ID.toString())), result.startedCases)
     }
 
     @Test
@@ -140,17 +143,20 @@ class EventCaseStartServiceTest : BaseTest() {
     }
 
     @Test
-    fun `should record an event and skip it when it is delivered again`() {
+    fun `should record an event and skip it when it is delivered again, returning the cases it started`() {
         val link = linked(link(EVENT_ITEM_ID))
         givenACaseCanBeStartedFor(link)
         givenStartMessageCorrelates()
-        service.handle(event())
-        verify(processedEventRepository).saveAndFlush(any())
+        val first = service.handle(event())
+        val recorded = argumentCaptor<ProcessedEvent>()
+        verify(processedEventRepository).saveAndFlush(recorded.capture())
 
-        whenever(processedEventRepository.existsById(EVENT_ID)).thenReturn(true)
+        whenever(processedEventRepository.findById(EVENT_ID)).thenReturn(Optional.of(recorded.firstValue))
         val second = service.handle(event())
 
         assertTrue(second.duplicate)
+        assertEquals(1, first.startedCases.size)
+        assertEquals(first.startedCases, second.startedCases)
         verify(documentService, org.mockito.kotlin.times(1)).createDocument(any())
     }
 
