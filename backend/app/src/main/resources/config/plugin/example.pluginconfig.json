@@ -4,7 +4,8 @@
         "title": "Event Message Bridge (Autodeployed)",
         "pluginDefinitionKey": "event-message-bridge",
         "properties": {
-            "embAppUrl": "${EMB_APP_URL}"
+            "embAppUrl": "${EMB_APP_URL}",
+            "embApiSecret": "${EMB_API_SECRET}"
         }
     }
 ]

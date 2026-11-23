@@ -20,8 +20,12 @@ import com.ritense.plugin.annotation.Plugin
 import com.ritense.plugin.annotation.PluginAction
 import com.ritense.plugin.annotation.PluginActionProperty
 import com.ritense.plugin.annotation.PluginProperty
+import com.fasterxml.jackson.databind.JsonNode
 import com.ritense.processlink.domain.ActivityTypeWithEventName.MESSAGE_START_EVENT_START
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.http.client.SimpleClientHttpRequestFactory
+import org.springframework.web.client.RestClient
+import java.util.UUID
 
 /**
  * Starts a case when the Event Message Bridge (EMB) receives an event for one of its event items.
@@ -35,6 +39,23 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 open class EventMessageBridgePlugin {
     @PluginProperty(key = "embAppUrl", secret = false)
     lateinit var embAppUrl: String
+
+    /** Sent to EMB in the [API_KEY_HEADER] header; must equal EMB's EMB_API_SECRET. Stored encrypted, never sent to the browser. */
+    @PluginProperty(key = "embApiSecret", secret = true)
+    lateinit var embApiSecret: String
+
+    /** EMB's event origins (id, name, type, description), for the origin select in the process link editor. */
+    open fun eventOrigins(): JsonNode = getFromEmb("/api/v1/event-origins")
+
+    /** The event items of one EMB origin, for the event item select in the process link editor. */
+    open fun eventItems(originId: UUID): JsonNode = getFromEmb("/api/v1/event-origins/$originId/event-items")
+
+    private fun getFromEmb(path: String): JsonNode =
+        restClient.get()
+            .uri(embAppUrl.trimEnd('/') + path)
+            .header(API_KEY_HEADER, embApiSecret)
+            .retrieve()
+            .body(JsonNode::class.java)!!
 
     /**
      * Never runs a process: the process link itself is the subscription. EventCaseStartService
@@ -57,6 +78,14 @@ open class EventMessageBridgePlugin {
     companion object {
         // Specific to this plugin: links are looked up by action key alone.
         const val RECEIVE_EVENT_ACTION_KEY = "receive-emb-event"
+        const val API_KEY_HEADER = "X-EMB-API-Key"
+        private val restClient =
+            RestClient.builder()
+                .requestFactory(SimpleClientHttpRequestFactory().apply {
+                    setConnectTimeout(5_000)
+                    setReadTimeout(10_000)
+                })
+                .build()
         private val logger = KotlinLogging.logger {}
     }
 }

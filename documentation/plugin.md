@@ -53,7 +53,10 @@ import {
 
 ## Configuration
 
-The plugin has no properties; a configuration only needs a name.
+| Property         | Required | Description                                                                                                  |
+|------------------|----------|--------------------------------------------------------------------------------------------------------------|
+| `embAppUrl`      | Yes      | The URL of the EMB application, e.g. `https://emb.example.com`. GZAC's backend calls it server to server.      |
+| `embApiSecret`   | Yes      | EMB's API secret: the value of `EMB_API_SECRET` in EMB. Stored encrypted and never sent to the browser; leave it empty when editing a configuration to keep the stored secret. |
 
 ## Actions
 
@@ -61,9 +64,13 @@ The plugin has no properties; a configuration only needs a name.
 
 Link it to a **message start event** of a case process.
 
-| Property      | Required | Description                                                                 |
-|---------------|----------|-----------------------------------------------------------------------------|
-| `eventItemId` | Yes      | The id of the event item in EMB, shown on the event item's detail page in EMB |
+| Property      | Required | Description                                                                                   |
+|---------------|----------|-----------------------------------------------------------------------------------------------|
+| `originId`    | Yes      | The event origin in EMB; only used to fill the event item select                               |
+| `eventItemId` | Yes      | The event item in EMB whose events start a case of this process; matching uses only this id   |
+
+Both are chosen from select lists filled from EMB through the plugin configuration (see
+[Origins and event items](#origins-and-event-items)).
 
 The action never runs as a process step: the process link is the subscription.
 
@@ -72,15 +79,18 @@ The action never runs as a process step: the process link is the subscription.
 - GZAC with external plugin support: EMB is added to GZAC as an external plugin app by URL, and authenticates with
   the service token GZAC pushes to it.
 - The process must belong to a case definition: the plugin only starts cases, not system processes.
+- GZAC's backend can reach EMB at the configuration's `embAppUrl`.
 
 ## Setting up the Event Message Bridge
 
 1. Add EMB to GZAC as an external plugin app and create a configuration for it. EMB's manifest asks for the endpoint
    grant `POST /api/v1/plugin/event-message-bridge/event`; accept it. On an existing configuration, accept the
    updated grants on its edit screen.
-2. In EMB, create an event origin and an event item. Copy the event item's id from its detail page into the
-   process link's **Event item ID**.
-3. End the event item's Camel route with EMB's built-in step, and give each event an id that stays the same when
+2. Set `EMB_API_SECRET` in EMB, and create a configuration of this plugin with EMB's URL and the same value as
+   **EMB API secret**.
+3. In EMB, create an event origin and an event item. In the process link on the message start event, choose the
+   plugin configuration, then the origin and the event item.
+4. End the event item's Camel route with EMB's built-in step, and give each event an id that stays the same when
    the source delivers it again, so the plugin can recognise a duplicate. For an Azure Event Hub:
 
    ```yaml
@@ -92,6 +102,20 @@ The action never runs as a process step: the process link is the subscription.
    ```
 
    EMB reports the event to this plugin and stores one mapped event per started case, with the case's business key.
+
+## Origins and event items
+
+The process link editor fills its selects through GZAC, not from EMB directly, so EMB's API secret stays in GZAC:
+
+```
+GET /api/v1/plugin/event-message-bridge/configuration/{configurationId}/event-origins
+GET /api/v1/plugin/event-message-bridge/configuration/{configurationId}/event-origins/{originId}/event-items
+```
+
+Both require the `ROLE_ADMIN` authority. GZAC's backend calls EMB's `GET /api/v1/event-origins` and
+`GET /api/v1/event-origins/{originId}/event-items` at the configuration's `embAppUrl`, with the configuration's
+`embApiSecret` in the `X-EMB-API-Key` header, and returns EMB's answer. A configuration id of another plugin gives
+`404`.
 
 ## Receiving events
 
@@ -143,7 +167,9 @@ The response lists the started cases; `businessKey` is the case document id:
 
 The plugin creates an `emb_processed_event` table. An event id is recorded before its cases are started, so a
 delivery of the same event again starts nothing and returns `"duplicate": true`. When starting a case fails with an
-error, the record rolls back with it, and EMB can send the event again.
+error, the record rolls back with it, and EMB can send the event again. When no case was started, because every matching
+link was skipped, the record is removed too: EMB can then resend the event once the links are fixed. A record
+without started cases never counts as a duplicate.
 
 | Column         | Description                     |
 |----------------|---------------------------------|

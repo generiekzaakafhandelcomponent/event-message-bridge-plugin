@@ -35,6 +35,9 @@ const eventMessageBridgePluginSpecification: PluginSpecification = {
         "De naam van de huidige plugin-configuratie. Onder deze naam kan de configuratie in de rest van de applicatie teruggevonden worden.",
       embAppUrl: "EMB-applicatie URL",
       embAppUrlTooltip: "De URL van de Event Message Bridge-applicatie.",
+      embApiSecret: "EMB API-secret",
+      embApiSecretTooltip:
+        "Het secret waarmee GZAC de bronnen en event items van de Event Message Bridge ophaalt (EMB_API_SECRET van de EMB-applicatie). Laat leeg bij wijzigen om het opgeslagen secret te behouden.",
       "receive-emb-event": "EMB-event ontvangen",
       receiveEmbEventDescription:
         "Start een zaak van dit proces bij dit message start event wanneer de Event Message Bridge een event voor het gekozen event item ontvangt.",
@@ -51,6 +54,9 @@ const eventMessageBridgePluginSpecification: PluginSpecification = {
         "The name of the current plugin configuration. Under this name, the configuration can be found in the rest of the application.",
       embAppUrl: "EMB application URL",
       embAppUrlTooltip: "The URL of the Event Message Bridge application.",
+      embApiSecret: "EMB API secret",
+      embApiSecretTooltip:
+        "The secret GZAC uses to fetch the origins and event items from the Event Message Bridge (EMB_API_SECRET of the EMB application). Leave empty when editing to keep the stored secret.",
       "receive-emb-event": "Receive EMB event",
       receiveEmbEventDescription:
         "Starts a case of this process at this message start event when the Event Message Bridge receives an event for the chosen event item.",

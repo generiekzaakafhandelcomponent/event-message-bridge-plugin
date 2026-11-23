@@ -29,6 +29,7 @@ import com.ritense.valtimoplugins.eventmessagebridge.plugin.EventMessageBridgePl
 import com.ritense.valtimoplugins.eventmessagebridge.repository.ProcessedEventRepository
 import com.ritense.valtimoplugins.eventmessagebridge.security.EventMessageBridgeHttpSecurityConfigurer
 import com.ritense.valtimoplugins.eventmessagebridge.service.EventCaseStartService
+import com.ritense.valtimoplugins.eventmessagebridge.web.rest.EmbOptionsResource
 import com.ritense.valtimoplugins.eventmessagebridge.web.rest.EventResource
 import org.operaton.bpm.engine.RepositoryService
 import org.operaton.bpm.engine.RuntimeService
@@ -78,6 +79,10 @@ class EventMessageBridgeAutoConfiguration {
     @ConditionalOnMissingBean(EventResource::class)
     fun eventMessageBridgeEventResource(eventCaseStartService: EventCaseStartService): EventResource =
         EventResource(eventCaseStartService)
+
+    @Bean
+    @ConditionalOnMissingBean(EmbOptionsResource::class)
+    fun eventMessageBridgeOptionsResource(pluginService: PluginService): EmbOptionsResource = EmbOptionsResource(pluginService)
 
     @Order(400)
     @Bean

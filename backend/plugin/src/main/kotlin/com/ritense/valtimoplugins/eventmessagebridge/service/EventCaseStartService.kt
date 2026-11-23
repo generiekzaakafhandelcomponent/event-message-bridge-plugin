@@ -98,10 +98,12 @@ open class EventCaseStartService(
         }
 
         val processed = processedEventRepository.findById(event.eventId).orElse(null)
-        if (processed != null) {
+        if (processed?.startedCases != null) {
             logger.debug { "Skipping duplicate EMB event '${event.eventId}'" }
-            return EventResult(duplicate = true, startedCases = processed.startedCases?.let { objectMapper.readValue(it) } ?: emptyList())
+            return EventResult(duplicate = true, startedCases = objectMapper.readValue(processed.startedCases!!))
         }
+        // A row without started cases is left from a delivery that started nothing: not a duplicate, handle it again.
+        if (processed != null) processedEventRepository.deleteByEventId(event.eventId)
         // Inserted and flushed now, so a concurrent delivery of the same event fails on this row
         // before it acts on anything, rather than after.
         val processedEvent = ProcessedEvent(eventId = event.eventId)
@@ -109,6 +111,11 @@ open class EventCaseStartService(
 
         val variables = buildProcessVariables(event)
         val startedCases = processLinks.mapNotNull { startCase(it, variables) }
+        if (startedCases.isEmpty()) {
+            // Nothing to guard against starting twice: forget the event, so EMB can resend it once a link is fixed.
+            processedEventRepository.deleteByEventId(event.eventId)
+            return EventResult(duplicate = false, startedCases = emptyList())
+        }
         // processedEvent is managed since its insert: this change is written on commit.
         processedEvent.startedCases = objectMapper.writeValueAsString(startedCases)
         return EventResult(duplicate = false, startedCases = startedCases)
