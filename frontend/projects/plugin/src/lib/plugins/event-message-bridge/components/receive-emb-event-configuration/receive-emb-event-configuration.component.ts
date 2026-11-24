@@ -15,9 +15,10 @@
  */
 
 import {Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output} from "@angular/core";
-import {HttpBackend, HttpClient} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {FunctionConfigurationComponent, FunctionConfigurationData} from "@valtimo/plugin";
 import {SelectItem} from "@valtimo/components";
+import {ConfigService} from "@valtimo/shared";
 import {
   BehaviorSubject,
   catchError,
@@ -61,29 +62,31 @@ export class ReceiveEmbEventConfigurationComponent implements FunctionConfigurat
   private readonly originId$ = new BehaviorSubject<string | null>(null);
   public readonly clearEventItem$ = new Subject<void>();
 
-  // Bypasses the app's interceptors so the GZAC bearer token is never sent to EMB (its list endpoints are public).
-  private readonly http = new HttpClient(inject(HttpBackend));
+  // GZAC calls EMB with the API secret of the selected plugin configuration; the browser never holds it.
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${inject(ConfigService).config.valtimoApi.endpointUri}v1/plugin/event-message-bridge/configuration`;
 
-  private embAppUrl$!: Observable<string>;
+  private optionsUrl$!: Observable<string>;
   public origins$!: Observable<SelectItem[] | null>;
   public eventItems$!: Observable<SelectItem[] | null>;
 
   public ngOnInit(): void {
-    this.embAppUrl$ = this.selectedPluginConfigurationData$.pipe(
-      map(config => config?.embAppUrl?.replace(/\/+$/, "")),
-      filter((url): url is string => !!url),
+    this.optionsUrl$ = this.selectedPluginConfigurationData$.pipe(
+      map(config => config?.configurationId),
+      filter((id): id is string => !!id),
+      map(id => `${this.apiUrl}/${encodeURIComponent(id)}`),
       distinctUntilChanged(),
       shareReplay(1)
     );
     // null while loading
-    this.origins$ = this.embAppUrl$.pipe(
-      switchMap(url => this.getOptions(`${url}/api/v1/event-origins`).pipe(startWith(null))),
+    this.origins$ = this.optionsUrl$.pipe(
+      switchMap(url => this.getOptions(`${url}/event-origins`).pipe(startWith(null))),
       shareReplay(1)
     );
-    this.eventItems$ = combineLatest([this.embAppUrl$, this.originId$]).pipe(
+    this.eventItems$ = combineLatest([this.optionsUrl$, this.originId$]).pipe(
       switchMap(([url, originId]) =>
         originId
-          ? this.getOptions(`${url}/api/v1/event-origins/${encodeURIComponent(originId)}/event-items`).pipe(startWith(null))
+          ? this.getOptions(`${url}/event-origins/${encodeURIComponent(originId)}/event-items`).pipe(startWith(null))
           : of([])
       ),
       shareReplay(1)
@@ -115,7 +118,7 @@ export class ReceiveEmbEventConfigurationComponent implements FunctionConfigurat
     return this.http.get<EmbOption[]>(url).pipe(
       map(options => options.map(option => ({id: option.id, text: option.name}))),
       catchError(error => {
-        console.error(`Could not load options from the Event Message Bridge at ${url}`, error);
+        console.error(`Could not load options from the Event Message Bridge via ${url}`, error);
         return of([]);
       })
     );

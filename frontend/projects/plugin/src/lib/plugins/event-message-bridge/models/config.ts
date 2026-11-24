@@ -18,6 +18,8 @@ import {PluginConfigurationData} from "@valtimo/plugin";
 
 interface EventMessageBridgePluginConfig extends PluginConfigurationData {
   embAppUrl: string;
+  /** Write-only: GZAC never returns it, so it is empty when editing; empty keeps the stored secret. */
+  embApiSecret?: string;
 }
 
 interface ReceiveEmbEventConfig {

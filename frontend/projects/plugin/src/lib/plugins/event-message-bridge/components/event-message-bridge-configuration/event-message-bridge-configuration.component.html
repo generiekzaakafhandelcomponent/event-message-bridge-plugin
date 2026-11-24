@@ -44,4 +44,15 @@
     [widthPx]="350"
   >
   </v-input>
+  <v-input
+    name="embApiSecret"
+    type="password"
+    [title]="'embApiSecret' | pluginTranslate: pluginId | async"
+    [margin]="true"
+    [disabled]="obs.disabled"
+    [required]="!obs.prefill?.configurationId"
+    [tooltip]="'embApiSecretTooltip' | pluginTranslate: pluginId | async"
+    [widthPx]="350"
+  >
+  </v-input>
 </v-form>

@@ -33,20 +33,26 @@ export class EventMessageBridgeConfigurationComponent implements PluginConfigura
   @Output() configuration: EventEmitter<PluginConfigurationData> = new EventEmitter<PluginConfigurationData>();
 
   private saveSubscription!: Subscription;
+  private prefillSubscription?: Subscription;
   private readonly formValue$ = new BehaviorSubject<EventMessageBridgePluginConfig | null>(null);
   private readonly valid$ = new BehaviorSubject<boolean>(false);
 
+  private editing = false;
+
   public ngOnInit(): void {
+    this.prefillSubscription = this.prefillConfiguration$?.subscribe(prefill => (this.editing = !!prefill?.configurationId));
     this.openSaveSubscription();
   }
 
   public ngOnDestroy() {
     this.saveSubscription?.unsubscribe();
+    this.prefillSubscription?.unsubscribe();
   }
 
   public formValueChange(formValue: EventMessageBridgePluginConfig): void {
     this.formValue$.next(formValue);
-    const valid = !!(formValue.configurationTitle && formValue.embAppUrl);
+    // the secret is required for a new configuration; when editing, empty keeps the stored one
+    const valid = !!(formValue.configurationTitle && formValue.embAppUrl && (this.editing || formValue.embApiSecret));
     this.valid$.next(valid);
     this.valid.emit(valid);
   }

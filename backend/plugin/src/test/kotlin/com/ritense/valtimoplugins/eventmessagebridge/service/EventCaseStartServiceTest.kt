@@ -38,6 +38,7 @@ import com.ritense.valtimoplugins.eventmessagebridge.BaseTest
 import com.ritense.valtimoplugins.eventmessagebridge.domain.ProcessedEvent
 import com.ritense.valtimoplugins.eventmessagebridge.repository.ProcessedEventRepository
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -161,6 +162,20 @@ class EventCaseStartServiceTest : BaseTest() {
     }
 
     @Test
+    fun `should handle an event again when its record has no started cases`() {
+        val link = linked(link(EVENT_ITEM_ID))
+        givenACaseCanBeStartedFor(link)
+        givenStartMessageCorrelates()
+        whenever(processedEventRepository.findById(EVENT_ID)).thenReturn(Optional.of(ProcessedEvent(eventId = EVENT_ID)))
+
+        val result = service.handle(event())
+
+        assertFalse(result.duplicate)
+        assertEquals(1, result.startedCases.size)
+        verify(processedEventRepository).deleteByEventId(EVENT_ID)
+    }
+
+    @Test
     fun `should skip a case process that may not initialise a document instead of failing`() {
         val link = linked(link(EVENT_ITEM_ID))
         givenACaseCanBeStartedFor(link, canInitializeDocument = false)
@@ -169,6 +184,8 @@ class EventCaseStartServiceTest : BaseTest() {
 
         assertTrue(result.startedCases.isEmpty())
         verify(documentService, never()).createDocument(any())
+        // forgotten, so EMB can resend the event once the link is fixed
+        verify(processedEventRepository).deleteByEventId(EVENT_ID)
     }
 
     @Test

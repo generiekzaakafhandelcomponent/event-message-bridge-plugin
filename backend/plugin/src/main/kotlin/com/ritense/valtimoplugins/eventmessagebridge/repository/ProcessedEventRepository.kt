@@ -18,5 +18,12 @@ package com.ritense.valtimoplugins.eventmessagebridge.repository
 
 import com.ritense.valtimoplugins.eventmessagebridge.domain.ProcessedEvent
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 
-interface ProcessedEventRepository : JpaRepository<ProcessedEvent, String>
+interface ProcessedEventRepository : JpaRepository<ProcessedEvent, String> {
+    // delete(entity) is a no-op here: ProcessedEvent.isNew() is always true, and Spring Data skips deleting new entities.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from ProcessedEvent p where p.eventId = :eventId")
+    fun deleteByEventId(eventId: String)
+}

@@ -19,7 +19,9 @@ package com.ritense.valtimoplugins.eventmessagebridge.security
 import com.ritense.valtimo.contract.authentication.AuthoritiesConstants.ADMIN
 import com.ritense.valtimo.contract.security.config.HttpConfigurerConfigurationException
 import com.ritense.valtimo.contract.security.config.HttpSecurityConfigurer
+import com.ritense.valtimoplugins.eventmessagebridge.web.rest.EmbOptionsResource.Companion.OPTIONS_URL
 import com.ritense.valtimoplugins.eventmessagebridge.web.rest.EventResource.Companion.EVENT_URL
+import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher
@@ -27,12 +29,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMa
 /**
  * ADMIN only. EMB calls with the service token GZAC pushes to external plugin apps: that token
  * carries ROLE_ADMIN and reaches only the endpoints EMB's manifest grants, this one included.
+ * The EMB options are for the process link editor, which only administrators use.
  */
 class EventMessageBridgeHttpSecurityConfigurer : HttpSecurityConfigurer {
     override fun configure(http: HttpSecurity) {
         try {
             http.authorizeHttpRequests { requests ->
-                requests.requestMatchers(antMatcher(POST, EVENT_URL)).hasAuthority(ADMIN)
+                requests
+                    .requestMatchers(antMatcher(POST, EVENT_URL)).hasAuthority(ADMIN)
+                    .requestMatchers(antMatcher(GET, "$OPTIONS_URL/**")).hasAuthority(ADMIN)
             }
         } catch (e: Exception) {
             throw HttpConfigurerConfigurationException(e)
