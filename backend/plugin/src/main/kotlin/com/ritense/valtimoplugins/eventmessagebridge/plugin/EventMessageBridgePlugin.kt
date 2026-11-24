@@ -23,8 +23,10 @@ import com.ritense.plugin.annotation.PluginProperty
 import com.fasterxml.jackson.databind.JsonNode
 import com.ritense.processlink.domain.ActivityTypeWithEventName.MESSAGE_START_EVENT_START
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.http.HttpStatus
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.web.client.RestClient
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 /**
@@ -55,7 +57,8 @@ open class EventMessageBridgePlugin {
             .uri(embAppUrl.trimEnd('/') + path)
             .header(API_KEY_HEADER, embApiSecret)
             .retrieve()
-            .body(JsonNode::class.java)!!
+            .body(JsonNode::class.java)
+            ?: throw ResponseStatusException(HttpStatus.BAD_GATEWAY, "EMB returned an empty response for $path")
 
     /**
      * Never runs a process: the process link itself is the subscription. EventCaseStartService

@@ -21,6 +21,7 @@ import com.ritense.plugin.domain.PluginConfigurationId
 import com.ritense.plugin.service.PluginService
 import com.ritense.valtimo.contract.annotation.SkipComponentScan
 import com.ritense.valtimoplugins.eventmessagebridge.plugin.EventMessageBridgePlugin
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -51,9 +52,15 @@ class EmbOptionsResource(
     ): JsonNode = plugin(configurationId).eventItems(originId)
 
     // a configuration of another plugin is not found here
-    private fun plugin(configurationId: UUID): EventMessageBridgePlugin =
-        pluginService.createInstance(PluginConfigurationId.existingId(configurationId)) as? EventMessageBridgePlugin
-            ?: throw ResponseStatusException(NOT_FOUND)
+    private fun plugin(configurationId: UUID): EventMessageBridgePlugin {
+        val instance =
+            try {
+                pluginService.createInstance(PluginConfigurationId.existingId(configurationId))
+            } catch (_: EntityNotFoundException) {
+                null // createInstance loads the configuration with getReferenceById, which throws for an unknown id
+            }
+        return instance as? EventMessageBridgePlugin ?: throw ResponseStatusException(NOT_FOUND)
+    }
 
     companion object {
         const val OPTIONS_URL = "/api/v1/plugin/event-message-bridge/configuration/{configurationId}"

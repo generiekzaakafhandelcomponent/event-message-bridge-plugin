@@ -37,7 +37,7 @@ class EventMessageBridgeHttpSecurityConfigurer : HttpSecurityConfigurer {
             http.authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers(antMatcher(POST, EVENT_URL)).hasAuthority(ADMIN)
-                    .requestMatchers(antMatcher(GET, OPTIONS_URL.replace("{configurationId}", "*") + "/**")).hasAuthority(ADMIN)
+                    .requestMatchers(antMatcher(GET, "$OPTIONS_URL/**")).hasAuthority(ADMIN)
             }
         } catch (e: Exception) {
             throw HttpConfigurerConfigurationException(e)
